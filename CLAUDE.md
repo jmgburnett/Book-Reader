@@ -25,13 +25,24 @@
 
 **Current State:** This is a new repository. The initial codebase is being established.
 
-**Tech Stack:** (To be determined based on initial setup)
-- Frontend: TBD (React, Vue, or vanilla JavaScript)
-- Backend: TBD (Node.js, Python, or other)
-- Database: TBD (SQLite, PostgreSQL, MongoDB, or other)
-- Build Tools: TBD
+**Tech Stack:**
+- **Frontend:** Next.js 14+ (React 18+, TypeScript)
+- **Backend:** Next.js API Routes (serverless functions)
+- **Database:** Supabase (PostgreSQL + Auth + Storage)
+- **Voice AI:** Eleven Labs API (voice cloning and text-to-speech)
+- **Deployment:** Vercel (serverless, edge functions)
+- **Build Tools:** Next.js built-in (Turbopack/Webpack)
 
-**Key Dependencies:** To be documented as they are added.
+**Key Dependencies:**
+- `next` - React framework with API routes
+- `react` & `react-dom` - UI library
+- `@supabase/supabase-js` - Supabase client
+- `@supabase/auth-helpers-nextjs` - Auth integration
+- `elevenlabs-node` or `elevenlabs` - Eleven Labs SDK
+- `pdf-parse` or `pdf.js` - PDF parsing and text extraction
+- `tailwindcss` - Utility-first CSS framework
+- `typescript` - Type safety
+- `zod` - Runtime validation
 
 ---
 
@@ -39,29 +50,44 @@
 
 ### Core Components
 
-1. **Reader Interface**
-   - Book rendering engine
-   - Page navigation
-   - Annotation and highlighting
-   - Bookmarking system
+1. **Voice Cloning System**
+   - Audio upload for voice samples
+   - Integration with Eleven Labs voice cloning API
+   - Voice profile management (CRUD operations)
+   - Voice selection and preview
 
-2. **Library Management**
-   - Book collection organization
-   - Metadata management
-   - Search and filtering
-   - Collections/categories
+2. **PDF Processing**
+   - PDF upload and validation
+   - Text extraction from PDFs
+   - Chapter/section detection
+   - Metadata extraction (title, author, pages)
 
-3. **File Processing**
-   - Format parsers (EPUB, PDF, MOBI, TXT, etc.)
-   - Text extraction
-   - Image handling
-   - Format conversion
+3. **Text-to-Speech Engine**
+   - Text chunking for API limits
+   - Streaming audio generation via Eleven Labs
+   - Audio playback controls (play, pause, stop, seek)
+   - Reading speed adjustment
+   - Queue management for long texts
 
-4. **User Settings**
-   - Reading preferences (font, size, theme)
-   - Layout customization
-   - Progress tracking
-   - Sync capabilities
+4. **Book Library**
+   - PDF storage in Supabase Storage
+   - Book metadata in Supabase DB
+   - User's book collection
+   - Reading progress tracking
+   - Bookmarks and notes
+
+5. **User Authentication**
+   - Supabase Auth integration
+   - Email/password authentication
+   - OAuth providers (Google, GitHub)
+   - Protected routes and API endpoints
+
+6. **Audio Playback Interface**
+   - Real-time audio player
+   - Visual progress indicator
+   - Text highlighting (current sentence/paragraph)
+   - Playback controls
+   - Volume and speed controls
 
 ### Design Principles
 
@@ -75,37 +101,89 @@
 
 ## Directory Structure
 
-The following structure should be followed as the project develops:
+Next.js 14+ App Router structure:
 
 ```
 Book-Reader/
-├── src/                    # Source code
-│   ├── components/         # Reusable UI components
-│   ├── core/              # Core business logic
-│   │   ├── parsers/       # Format parsers (EPUB, PDF, etc.)
-│   │   ├── reader/        # Reading engine
-│   │   └── library/       # Library management
-│   ├── services/          # External services and APIs
-│   ├── utils/             # Utility functions
-│   ├── styles/            # Global styles and themes
-│   ├── types/             # TypeScript type definitions
-│   └── config/            # Configuration files
-├── tests/                 # Test files
-│   ├── unit/             # Unit tests
-│   ├── integration/      # Integration tests
-│   └── e2e/              # End-to-end tests
-├── docs/                  # Documentation
-│   ├── api/              # API documentation
-│   ├── architecture/     # Architecture decisions
-│   └── user-guide/       # User documentation
-├── public/               # Static assets
-│   ├── fonts/           # Font files
-│   ├── icons/           # Icon assets
-│   └── images/          # Image assets
-├── scripts/              # Build and utility scripts
-├── .github/             # GitHub configurations
-│   └── workflows/       # CI/CD workflows
-└── config/              # Build tool configurations
+├── app/                        # Next.js 14+ App Router
+│   ├── (auth)/                # Auth route group
+│   │   ├── login/            # Login page
+│   │   └── signup/           # Signup page
+│   ├── (dashboard)/          # Protected dashboard routes
+│   │   ├── library/          # Book library page
+│   │   ├── reader/           # Book reader page
+│   │   │   └── [bookId]/    # Dynamic book reader
+│   │   └── voices/           # Voice management page
+│   ├── api/                  # API Routes (serverless functions)
+│   │   ├── books/           # Book CRUD operations
+│   │   ├── voices/          # Voice management
+│   │   ├── tts/             # Text-to-speech generation
+│   │   ├── pdf/             # PDF processing
+│   │   └── webhook/         # Webhooks (Supabase, Eleven Labs)
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Home page
+│   ├── globals.css          # Global styles
+│   └── providers.tsx        # Context providers
+├── components/               # Reusable React components
+│   ├── ui/                  # Base UI components
+│   │   ├── button.tsx
+│   │   ├── dialog.tsx
+│   │   └── input.tsx
+│   ├── audio/               # Audio player components
+│   │   ├── player.tsx
+│   │   └── controls.tsx
+│   ├── book/                # Book-related components
+│   │   ├── pdf-viewer.tsx
+│   │   └── book-card.tsx
+│   └── voice/               # Voice-related components
+│       ├── voice-clone.tsx
+│       └── voice-selector.tsx
+├── lib/                      # Core business logic
+│   ├── supabase/            # Supabase client & utilities
+│   │   ├── client.ts        # Browser client
+│   │   ├── server.ts        # Server client
+│   │   └── middleware.ts    # Auth middleware
+│   ├── elevenlabs/          # Eleven Labs integration
+│   │   ├── client.ts        # API client
+│   │   ├── tts.ts          # Text-to-speech functions
+│   │   └── voices.ts        # Voice management
+│   ├── pdf/                 # PDF processing
+│   │   ├── parser.ts        # PDF parsing
+│   │   └── extractor.ts     # Text extraction
+│   ├── audio/               # Audio processing
+│   │   ├── chunker.ts       # Text chunking
+│   │   └── queue.ts         # Audio queue management
+│   └── utils/               # Utility functions
+│       ├── validation.ts    # Input validation
+│       └── helpers.ts       # General helpers
+├── types/                    # TypeScript type definitions
+│   ├── book.ts
+│   ├── voice.ts
+│   ├── audio.ts
+│   └── supabase.ts
+├── hooks/                    # Custom React hooks
+│   ├── useAudioPlayer.ts
+│   ├── useBookReader.ts
+│   └── useVoices.ts
+├── public/                   # Static assets
+│   ├── icons/
+│   └── images/
+├── supabase/                 # Supabase configuration
+│   ├── migrations/          # Database migrations
+│   └── seed.sql             # Seed data
+├── tests/                    # Test files
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── .github/                  # GitHub configurations
+│   └── workflows/           # CI/CD workflows
+├── .env.local.example       # Environment variables template
+├── .env.local               # Local environment variables (gitignored)
+├── next.config.js           # Next.js configuration
+├── tailwind.config.ts       # Tailwind CSS configuration
+├── tsconfig.json            # TypeScript configuration
+├── package.json             # Dependencies and scripts
+└── vercel.json              # Vercel deployment config
 ```
 
 ---
@@ -545,43 +623,464 @@ class ReaderState {
 
 ---
 
+## Third-Party Integrations
+
+### Eleven Labs API
+
+**Purpose:** Voice cloning and text-to-speech generation
+
+**Key Operations:**
+
+1. **Voice Cloning:**
+   ```typescript
+   // lib/elevenlabs/voices.ts
+   import { ElevenLabsClient } from "elevenlabs";
+
+   const client = new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY });
+
+   // Clone a voice from audio samples
+   async function cloneVoice(audioFiles: File[], name: string, description: string) {
+     const voice = await client.voices.add({
+       name,
+       description,
+       files: audioFiles,
+     });
+     return voice;
+   }
+   ```
+
+2. **Text-to-Speech:**
+   ```typescript
+   // lib/elevenlabs/tts.ts
+   async function generateSpeech(text: string, voiceId: string) {
+     const audio = await client.textToSpeech.convert(voiceId, {
+       text,
+       model_id: "eleven_multilingual_v2",
+     });
+     return audio;
+   }
+   ```
+
+3. **Streaming TTS:**
+   ```typescript
+   // For long texts, use streaming
+   async function streamSpeech(text: string, voiceId: string) {
+     const stream = await client.textToSpeech.convertAsStream(voiceId, {
+       text,
+       model_id: "eleven_multilingual_v2",
+     });
+     return stream;
+   }
+   ```
+
+**Best Practices:**
+- Chunk text into manageable sizes (< 5000 characters)
+- Cache generated audio when possible
+- Handle rate limits gracefully
+- Store voice IDs in database for reuse
+- Use streaming for real-time playback
+
+**Environment Variables:**
+```bash
+ELEVENLABS_API_KEY=your_api_key_here
+```
+
+### Supabase Integration
+
+**Purpose:** Database, authentication, and file storage
+
+**Setup:**
+
+1. **Client Configuration:**
+   ```typescript
+   // lib/supabase/client.ts (browser)
+   import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
+   export const createClient = () => createClientComponentClient();
+   ```
+
+   ```typescript
+   // lib/supabase/server.ts (server components)
+   import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+   import { cookies } from 'next/headers';
+
+   export const createClient = () => createServerComponentClient({ cookies });
+   ```
+
+2. **Database Schema:**
+   ```sql
+   -- supabase/migrations/001_initial_schema.sql
+
+   -- Users table (extended from auth.users)
+   create table public.profiles (
+     id uuid references auth.users on delete cascade primary key,
+     email text,
+     full_name text,
+     avatar_url text,
+     created_at timestamp with time zone default timezone('utc'::text, now())
+   );
+
+   -- Books table
+   create table public.books (
+     id uuid default uuid_generate_v4() primary key,
+     user_id uuid references public.profiles on delete cascade,
+     title text not null,
+     author text,
+     file_path text not null,
+     file_size bigint,
+     page_count integer,
+     created_at timestamp with time zone default timezone('utc'::text, now()),
+     updated_at timestamp with time zone default timezone('utc'::text, now())
+   );
+
+   -- Voices table
+   create table public.voices (
+     id uuid default uuid_generate_v4() primary key,
+     user_id uuid references public.profiles on delete cascade,
+     elevenlabs_voice_id text not null unique,
+     name text not null,
+     description text,
+     is_default boolean default false,
+     created_at timestamp with time zone default timezone('utc'::text, now())
+   );
+
+   -- Reading progress table
+   create table public.reading_progress (
+     id uuid default uuid_generate_v4() primary key,
+     user_id uuid references public.profiles on delete cascade,
+     book_id uuid references public.books on delete cascade,
+     current_page integer default 0,
+     current_position integer default 0,
+     last_read_at timestamp with time zone default timezone('utc'::text, now()),
+     unique(user_id, book_id)
+   );
+
+   -- Bookmarks table
+   create table public.bookmarks (
+     id uuid default uuid_generate_v4() primary key,
+     user_id uuid references public.profiles on delete cascade,
+     book_id uuid references public.books on delete cascade,
+     page_number integer not null,
+     text_snippet text,
+     note text,
+     created_at timestamp with time zone default timezone('utc'::text, now())
+   );
+
+   -- Enable Row Level Security
+   alter table public.profiles enable row level security;
+   alter table public.books enable row level security;
+   alter table public.voices enable row level security;
+   alter table public.reading_progress enable row level security;
+   alter table public.bookmarks enable row level security;
+
+   -- RLS Policies
+   create policy "Users can view own profile"
+     on public.profiles for select
+     using (auth.uid() = id);
+
+   create policy "Users can update own profile"
+     on public.profiles for update
+     using (auth.uid() = id);
+
+   create policy "Users can view own books"
+     on public.books for select
+     using (auth.uid() = user_id);
+
+   create policy "Users can insert own books"
+     on public.books for insert
+     with check (auth.uid() = user_id);
+
+   create policy "Users can update own books"
+     on public.books for update
+     using (auth.uid() = user_id);
+
+   create policy "Users can delete own books"
+     on public.books for delete
+     using (auth.uid() = user_id);
+   ```
+
+3. **Storage Buckets:**
+   ```typescript
+   // Create buckets for PDFs and audio samples
+   // Bucket: 'books' - for PDF files
+   // Bucket: 'voice-samples' - for voice training audio
+
+   // Upload PDF
+   async function uploadBook(file: File, userId: string) {
+     const fileName = `${userId}/${Date.now()}-${file.name}`;
+     const { data, error } = await supabase.storage
+       .from('books')
+       .upload(fileName, file);
+     return data?.path;
+   }
+   ```
+
+4. **Authentication:**
+   ```typescript
+   // app/api/auth/callback/route.ts
+   import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+   import { cookies } from 'next/headers';
+   import { NextResponse } from 'next/server';
+
+   export async function GET(request: Request) {
+     const requestUrl = new URL(request.url);
+     const code = requestUrl.searchParams.get('code');
+
+     if (code) {
+       const supabase = createRouteHandlerClient({ cookies });
+       await supabase.auth.exchangeCodeForSession(code);
+     }
+
+     return NextResponse.redirect(requestUrl.origin);
+   }
+   ```
+
+**Environment Variables:**
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### Vercel Deployment
+
+**Configuration:**
+
+1. **vercel.json:**
+   ```json
+   {
+     "buildCommand": "npm run build",
+     "devCommand": "npm run dev",
+     "installCommand": "npm install",
+     "framework": "nextjs",
+     "regions": ["iad1"],
+     "env": {
+       "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+       "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
+       "ELEVENLABS_API_KEY": "@elevenlabs-api-key"
+     }
+   }
+   ```
+
+2. **Edge Functions:**
+   ```typescript
+   // app/api/tts/route.ts
+   export const runtime = 'edge'; // Use edge runtime for low latency
+
+   export async function POST(request: Request) {
+     // TTS logic here
+   }
+   ```
+
+3. **Environment Variables:**
+   - Set in Vercel dashboard or via CLI
+   - Use `NEXT_PUBLIC_` prefix for client-side variables
+   - Keep sensitive keys server-side only
+
+**Deployment Steps:**
+1. Connect GitHub repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Set up Supabase connection
+4. Configure domains (if custom)
+5. Enable automatic deployments on push
+
+**Best Practices:**
+- Use Edge Functions for TTS to reduce latency
+- Enable caching for static assets
+- Use incremental static regeneration (ISR) where applicable
+- Monitor function execution times
+- Set appropriate timeout limits for long-running operations
+
+---
+
 ## Common Tasks
 
-### Adding a New Book Format
+### Adding a New Voice
 
-1. Create parser in `src/core/parsers/`
-2. Extend BaseParser class
-3. Implement format-specific parsing
-4. Add tests in `tests/unit/parsers/`
-5. Register parser in format registry
-6. Update documentation
+1. Navigate to `/voices` page
+2. Upload audio samples (at least 1 minute of clear speech)
+3. Use `lib/elevenlabs/voices.ts` to call Eleven Labs API
+4. Store voice ID in Supabase `voices` table
+5. Display in voice selector component
 
-### Adding a Reader Feature
+**Code:**
+```typescript
+// app/api/voices/route.ts
+export async function POST(request: Request) {
+  const formData = await request.formData();
+  const audioFiles = formData.getAll('files') as File[];
+  const name = formData.get('name') as string;
 
-1. Identify feature location (reader, UI, both)
-2. Update reader state if needed
-3. Implement UI component
-4. Wire up event handlers
-5. Add tests
-6. Update user documentation
+  // Clone voice with Eleven Labs
+  const voice = await cloneVoice(audioFiles, name, description);
+
+  // Save to database
+  const { data, error } = await supabase
+    .from('voices')
+    .insert({ elevenlabs_voice_id: voice.voice_id, name, user_id });
+
+  return NextResponse.json(data);
+}
+```
+
+### Processing a PDF
+
+1. User uploads PDF via `/library` page
+2. API route validates file (size, type)
+3. Upload to Supabase Storage
+4. Extract text using `lib/pdf/parser.ts`
+5. Store metadata in `books` table
+6. Return book ID for reader
+
+**Code:**
+```typescript
+// app/api/books/route.ts
+export async function POST(request: Request) {
+  const formData = await request.formData();
+  const file = formData.get('file') as File;
+
+  // Upload to storage
+  const filePath = await uploadBook(file, userId);
+
+  // Extract text and metadata
+  const { text, metadata } = await parsePDF(file);
+
+  // Save to database
+  const { data } = await supabase.from('books').insert({
+    title: metadata.title,
+    author: metadata.author,
+    file_path: filePath,
+    page_count: metadata.pageCount,
+    user_id: userId
+  });
+
+  return NextResponse.json(data);
+}
+```
+
+### Generating Speech from Text
+
+1. User opens book in reader (`/reader/[bookId]`)
+2. Select voice from dropdown
+3. Click play button
+4. Chunk text into manageable pieces
+5. Stream audio from Eleven Labs API
+6. Play in audio player component
+
+**Code:**
+```typescript
+// app/api/tts/route.ts
+export const runtime = 'edge';
+
+export async function POST(request: Request) {
+  const { text, voiceId } = await request.json();
+
+  // Chunk text if needed
+  const chunks = chunkText(text, 5000);
+
+  // Stream first chunk
+  const audioStream = await streamSpeech(chunks[0], voiceId);
+
+  return new Response(audioStream, {
+    headers: { 'Content-Type': 'audio/mpeg' }
+  });
+}
+```
+
+### Adding Reading Progress Tracking
+
+1. Update `reading_progress` table on page/position change
+2. Use debounced updates to avoid excessive writes
+3. Load progress when opening book
+4. Display progress indicator in UI
+
+**Code:**
+```typescript
+// hooks/useReadingProgress.ts
+export function useReadingProgress(bookId: string) {
+  const saveProgress = useDebouncedCallback(
+    async (page: number, position: number) => {
+      await supabase.from('reading_progress').upsert({
+        book_id: bookId,
+        user_id: userId,
+        current_page: page,
+        current_position: position,
+        last_read_at: new Date().toISOString()
+      });
+    },
+    1000
+  );
+
+  return { saveProgress };
+}
+```
+
+### Adding Authentication
+
+1. Set up Supabase Auth in `lib/supabase/`
+2. Create login/signup pages in `app/(auth)/`
+3. Add middleware for protected routes
+4. Use `createServerComponentClient` in server components
+5. Use `createClientComponentClient` in client components
+
+**Code:**
+```typescript
+// middleware.ts
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  return res;
+}
+```
 
 ### Fixing a Bug
 
-1. Reproduce the bug
-2. Write a failing test
-3. Fix the bug
-4. Verify test passes
-5. Check for similar issues
-6. Commit with descriptive message
+1. Reproduce the bug locally
+2. Check error logs (Vercel logs, browser console)
+3. Write a failing test
+4. Fix the bug
+5. Verify test passes
+6. Test in development environment
+7. Commit with descriptive message
+8. Push and verify in staging/production
 
 ### Adding Tests
 
 1. Identify what to test (unit, integration, e2e)
-2. Create test file in appropriate directory
+2. Create test file in `tests/` directory
 3. Write descriptive test cases
-4. Ensure tests are isolated
-5. Run test suite to verify
-6. Update CI configuration if needed
+4. Mock external services (Eleven Labs, Supabase)
+5. Run test suite: `npm test`
+6. Ensure tests pass in CI/CD pipeline
+
+**Example:**
+```typescript
+// tests/unit/lib/pdf/parser.test.ts
+import { parsePDF } from '@/lib/pdf/parser';
+
+describe('PDF Parser', () => {
+  it('should extract text from valid PDF', async () => {
+    const file = new File(['mock pdf content'], 'test.pdf');
+    const result = await parsePDF(file);
+
+    expect(result.text).toBeDefined();
+    expect(result.metadata.pageCount).toBeGreaterThan(0);
+  });
+
+  it('should throw error for invalid PDF', async () => {
+    const file = new File(['not a pdf'], 'invalid.pdf');
+
+    await expect(parsePDF(file)).rejects.toThrow();
+  });
+});
+```
 
 ---
 
@@ -590,23 +1089,37 @@ class ReaderState {
 ### Essential Commands
 
 ```bash
-# Install dependencies (once tech stack is chosen)
-npm install  # or yarn install, pip install -r requirements.txt
+# Install dependencies
+npm install
 
 # Run development server
-npm run dev  # or yarn dev, python manage.py runserver
+npm run dev
 
 # Run tests
-npm test     # or yarn test, pytest
+npm test
+# or with watch mode
+npm test -- --watch
 
 # Build for production
-npm run build  # or yarn build
+npm run build
+
+# Start production server (after build)
+npm start
 
 # Lint code
-npm run lint  # or yarn lint
+npm run lint
 
-# Format code
-npm run format  # or yarn format
+# Format code (if Prettier is configured)
+npm run format
+
+# Type check
+npx tsc --noEmit
+
+# Supabase commands (if using Supabase CLI)
+npx supabase init
+npx supabase start
+npx supabase migration new migration_name
+npx supabase db push
 ```
 
 ### File References
@@ -622,17 +1135,28 @@ This helps users navigate to the exact location.
 
 - `CLAUDE.md` (this file): AI assistant guide
 - `README.md`: User-facing documentation
-- `package.json`: Dependencies and scripts (if Node.js)
-- `.gitignore`: Ignored files
-- `LICENSE`: Project license
+- `package.json`: Dependencies and scripts
+- `next.config.js`: Next.js configuration
+- `tsconfig.json`: TypeScript configuration
+- `tailwind.config.ts`: Tailwind CSS configuration
+- `.env.local`: Environment variables (gitignored)
+- `.env.local.example`: Environment variables template
+- `middleware.ts`: Next.js middleware (auth, routing)
+- `vercel.json`: Vercel deployment configuration
+- `supabase/migrations/`: Database schema migrations
 
 ---
 
 ## Revision History
 
-| Date       | Version | Changes                           |
-|------------|---------|-----------------------------------|
-| 2026-01-16 | 1.0.0   | Initial creation of CLAUDE.md     |
+| Date       | Version | Changes                                              |
+|------------|---------|------------------------------------------------------|
+| 2026-01-16 | 1.0.0   | Initial creation of CLAUDE.md                        |
+| 2026-01-16 | 2.0.0   | Updated with full tech stack (Next.js, Supabase, ElevenLabs) |
+|            |         | Added Third-Party Integrations section               |
+|            |         | Updated directory structure for Next.js App Router   |
+|            |         | Updated Common Tasks with actual implementation      |
+|            |         | Added database schema and code examples              |
 
 ---
 
